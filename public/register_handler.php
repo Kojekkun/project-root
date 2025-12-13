@@ -5,14 +5,14 @@ require_once __DIR__ . '/../app/helpers.php';
 require_once __DIR__ . '/../app/mailer.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /register.php');
+    header('Location: register.php');
     exit;
 }
 
 // 1. Validasi CSRF
 if (!csrf_check($_POST['csrf'] ?? '')) {
     flash_set('error', 'Permintaan tidak valid (CSRF).');
-    header('Location: /register.php');
+    header('Location: register.php');
     exit;
 }
 
@@ -23,7 +23,7 @@ $password = $_POST['password'] ?? '';
 // Validasi Input
 if (empty($name) || empty($email) || empty($password) || strlen($password) < 6) {
     flash_set('error', 'Semua kolom wajib diisi dan password minimal 6 karakter.');
-    header('Location: /register.php');
+    header('Location: register.php');
     exit;
 }
 
@@ -32,7 +32,7 @@ $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ?');
 $stmt->execute([$email]);
 if ($stmt->fetch()) {
     flash_set('error', 'Email sudah terdaftar. Silakan login atau gunakan email lain.');
-    header('Location: /register.php');
+    header('Location: register.php');
     exit;
 }
 
@@ -59,5 +59,5 @@ try {
     flash_set('error', 'Terjadi kesalahan sistem saat mendaftar.');
 }
 
-header('Location: /login.php');
+header('Location: login.php');
 exit;

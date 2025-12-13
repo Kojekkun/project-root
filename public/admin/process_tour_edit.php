@@ -1,0 +1,1 @@
+<?php require_once __DIR__ . '/../../app/controllers/tour_update_handler.php';

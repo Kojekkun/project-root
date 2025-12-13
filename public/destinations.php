@@ -18,14 +18,29 @@ $list=$stmt->fetchAll();
     <nav class="nav">
         <a class="brand" href="index.php">Pariwisata</a>
         <div class="nav-right">
-            <a href="index.php">Home</a>
             <?php if(is_logged()): ?>
-                <a href="profile.php">Hi, <?= e($_SESSION['user_name']) ?></a> | 
-                <a href="logout.php">Logout</a>
+        
+            <?php 
+                $nav_foto = 'assets/images/placeholder.jpg'; 
+                if (!empty($_SESSION['user_avatar']) && file_exists(__DIR__ . '/uploads/avatars/' . $_SESSION['user_avatar'])) {
+                    $nav_foto = 'uploads/avatars/' . $_SESSION['user_avatar'];
+                }
+            ?>
+
+            <a href="profile.php" class="nav-profile">
+                <img src="<?= $nav_foto ?>" class="nav-avatar" alt="Profil">
+                <span class="nav-name"><?= e($_SESSION['user_name']) ?></span>
+            </a>
+            
+            <span style="color:#ccc; margin: 0 5px;">|</span>
+            
+            <a href="logout.php" style="color:#ef4444; text-decoration:none; font-size:0.9rem;">Logout</a>
+
             <?php else: ?>
                 <a href="login.php">Login</a> | 
                 <a href="register.php">Daftar</a>
             <?php endif; ?>
+            
         </div>
     </nav>
 
