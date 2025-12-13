@@ -1,13 +1,15 @@
 <?php
 // app/config.php (DIKOREKSI)
 // Sesuaikan dengan environment kamu
-$DB_HOST = 'localhost';
-$DB_NAME = 'pariwisata_db';
-$DB_USER = 'dbuser';
-$DB_PASS = 'dbpass';
+$DB_HOST = 'pariwisata-db-server.mysql.database.azure.com'; // Ganti dengan Server Name dari Azure
+$DB_NAME = 'pariwisata_db'; // Nama database yang akan kita buat nanti
+$DB_USER = 'pariwisata'; // Username admin Azure Anda
+$DB_PASS = '(Kocaklol33)';  // Password admin Azure Anda
 
 // Base URL aplikasi (tanpa trailing slash)
-$BASE_URL = 'https://yourdomain.com';
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
+$host = $_SERVER['HTTP_HOST']; // Akan mendeteksi 'localhost' atau 'nama-web.azurewebsites.net'
+$BASE_URL = $protocol . $host;
 
 // Email (gunakan SMTP jika hosting support)
 // Jika menggunakan mail() native, pastikan server punya MTA atau gunakan layanan SMTP
