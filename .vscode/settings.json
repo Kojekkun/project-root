@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/5c46eebc-15d6-4c36-b411-580c25ed1849/resourceGroups/RG-Pariwisata/providers/Microsoft.Web/sites/pariwisata",
+    "appService.deploySubpath": "."
+}
