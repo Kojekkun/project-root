@@ -46,10 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Insert ke Database
+    
     try {
-        $sql = "INSERT INTO tours (title, destination_id, description, itinerary, price, contact, image, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
+        $map_embed = $_POST['map_embed'] ?? ''; // Ambil data map
+
+        $sql = "INSERT INTO tours (title, destination_id, description, itinerary, price, contact, image, map_embed, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$title, $dest_id, $description, $itinerary, $price, $contact, $image_filename]);
+        $stmt->execute([$title, $dest_id, $description, $itinerary, $price, $contact, $image_filename, $map_embed]);
 
         flash_set('success', 'Paket tour baru berhasil ditambahkan.');
         session_write_close();

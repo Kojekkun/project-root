@@ -1,34 +1,32 @@
 <?php
-// public/admin/destination_edit.php
 require_once __DIR__ . '/../../app/helpers.php';
 require_once __DIR__ . '/../../app/db.php';
 
 require_login();
 
-// 1. Cek Admin
 if (($_SESSION['user_role'] ?? '') !== 'admin') {
     flash_set('error', 'Akses ditolak.');
-    header('Location: /index.php');
+    header('Location: ../index.php');
     exit;
 }
 
-// 2. Ambil ID dari URL
 $id = $_GET['id'] ?? 0;
 
-// 3. Ambil Data Wisata Lama
 $stmt = $pdo->prepare("SELECT * FROM destinations WHERE id = ?");
 $stmt->execute([$id]);
 $dest = $stmt->fetch();
 
 if (!$dest) {
     flash_set('error', 'Data wisata tidak ditemukan.');
-    header('Location: /destinations.php');
+    header('Location: ../destinations.php');
     exit;
 }
 
-// 4. Ambil Data Kategori
 $stmt_cat = $pdo->query("SELECT * FROM categories");
 $categories = $stmt_cat->fetchAll();
+
+// Cek apakah gambar saat ini adalah link URL?
+$is_url = strpos($dest['image'], 'http') === 0;
 ?>
 <!doctype html>
 <html>
@@ -36,29 +34,13 @@ $categories = $stmt_cat->fetchAll();
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Edit - <?= e($dest['title']) ?></title>
-    <link rel="stylesheet" href="../assets/css/style.css?v=4">
+    <link rel="stylesheet" href="../assets/css/style.css?v=7">
 </head>
 <body>
     <nav class="nav">
-        <a class="brand" href="/index.php">Admin Panel</a>
+        <a class="brand" href="../index.php">Admin Panel</a>
         <div class="nav-right">
-            <a href="../destination_detail.php?id=<?= $dest['id'] ?>" style="text-decoration:none; color:#555;">&larr; Batal & Kembali</a>
-            
-            <div class="nav-separator"></div>
-
-            <?php 
-                // PERBAIKAN: Path default placeholder (../)
-                $nav_foto = '../assets/images/placeholder.jpg'; 
-                
-                // Cek fisik file pakai path server (__DIR__), tapi path HTML pakai relatif (../)
-                if (!empty($_SESSION['user_avatar']) && file_exists(__DIR__ . '/../../public/uploads/avatars/' . $_SESSION['user_avatar'])) {
-                    $nav_foto = '../uploads/avatars/' . $_SESSION['user_avatar'];
-                }
-            ?>
-            <a href="/profile.php" class="nav-profile">
-                <img src="<?= $nav_foto ?>" class="nav-avatar">
-                <span class="nav-name"><?= e($_SESSION['user_name']) ?></span>
-            </a>
+            <a href="../destination_detail.php?id=<?= $dest['id'] ?>" style="text-decoration:none; color:#555;">← Batal & Kembali</a>
         </div>
     </nav>
 
@@ -87,19 +69,35 @@ $categories = $stmt_cat->fetchAll();
                     <?php endforeach; ?>
                 </select>
                 
-                <label>Lokasi</label>
+                <label>Lokasi (Teks)</label>
                 <input name="location" required value="<?= e($dest['location']) ?>">
                 
                 <label>Deskripsi Lengkap</label>
                 <textarea name="description" rows="6" required><?= e($dest['description']) ?></textarea>
+
+                <label>Google Maps Embed HTML</label>
+                <textarea name="map_embed" rows="3"><?= $dest['map_embed'] ?></textarea>
                 
+                <hr style="margin: 20px 0; border:0; border-top:1px dashed #ddd;">
+
                 <label>Foto Saat Ini</label>
-                <div style="margin-bottom: 10px;">
-                    <img src="../uploads/<?= e($dest['image'] ?? 'placeholder.jpg') ?>" style="height: 100px; border-radius: 4px;">
+                <div style="margin-bottom: 20px;">
+                    <img src="../<?= get_image_url($dest['image']) ?>" style="height: 150px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover;">
                 </div>
                 
-                <label>Ganti Foto (Opsional)</label>
-                <input type="file" name="image" accept="image/*">
+                <label>Ganti Foto (Biarkan kosong jika tidak ingin mengganti)</label>
+                
+                <div style="background: #f0fdf4; padding: 15px; border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 10px;">
+                    <span style="font-size:0.9rem; font-weight:bold; color:#166534; display:block; margin-bottom:5px;">Opsi A: Upload File Baru</span>
+                    <input type="file" name="image" accept="image/*" style="background:white; margin-bottom:0;">
+                </div>
+
+                <div style="text-align:center; font-weight:bold; color:#999; margin: 10px 0;">ATAU</div>
+
+                <div style="background: #eff6ff; padding: 15px; border: 1px solid #bfdbfe; border-radius: 8px; margin-bottom: 20px;">
+                    <span style="font-size:0.9rem; font-weight:bold; color:#1e40af; display:block; margin-bottom:5px;">Opsi B: Gunakan Link Gambar (URL)</span>
+                    <input type="url" name="image_url" placeholder="https://..." value="<?= $is_url ? e($dest['image']) : '' ?>" style="margin-bottom:0; background:white;">
+                </div>
                 
                 <button class="btn" style="width:100%; margin-top:20px;">Simpan Perubahan</button>
             </form>

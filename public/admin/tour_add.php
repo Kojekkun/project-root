@@ -11,7 +11,7 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
     exit;
 }
 
-// Ambil data destinasi untuk dropdown (Supaya bisa dihubungkan)
+// Ambil data destinasi untuk dropdown
 $stmt = $pdo->query("SELECT id, title FROM destinations ORDER BY title ASC");
 $destinations = $stmt->fetchAll();
 ?>
@@ -27,7 +27,7 @@ $destinations = $stmt->fetchAll();
     <nav class="nav">
         <a class="brand" href="../index.php">Admin Panel</a>
         <div class="nav-right">
-            <a href="../index.php" style="text-decoration:none; color:#555;">&larr; Batal & Kembali</a>
+            <a href="../index.php" style="text-decoration:none; color:#555;">← Batal & Kembali</a>
         </div>
     </nav>
 
@@ -69,7 +69,7 @@ $destinations = $stmt->fetchAll();
                 <textarea name="description" rows="3" required placeholder="Penjelasan singkat tentang paket ini..."></textarea>
 
                 <label>Jadwal Perjalanan (Itinerary)</label>
-                <textarea name="itinerary" rows="5" placeholder="Hari 1: Penjemputan... &#10;Hari 2: Wisata..."></textarea>
+                <textarea name="itinerary" rows="5" placeholder="Hari 1: Penjemputan... Hari 2: Wisata..."></textarea>
                 
                 <label>Foto Utama</label>
                 <input type="file" name="image" accept="image/*" required>

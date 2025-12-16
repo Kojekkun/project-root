@@ -20,13 +20,13 @@ $user = $stmt->fetch(); // Variabel yang benar: $user
 
 if (!$user) { // Menggunakan $user
     flash_set('error', 'Token aktivasi tidak valid.');
-    header('Location: /login.php');
+    header('Location: login.php');
     exit;
 }
 
 if(($user['status'] ?? '') === 'active'){ // Menggunakan $user
     flash_set('error', 'Akun sudah aktif. Silakan masuk.');
-    header('Location: /login.php');
+    header('Location: login.php');
     exit; 
 }
 
@@ -34,5 +34,5 @@ if(($user['status'] ?? '') === 'active'){ // Menggunakan $user
 $pdo->prepare('UPDATE users SET status="active", activation_token=NULL WHERE id=?')->execute([$user['id']]); // Menggunakan $user
 
 flash_set('success', 'Aktivasi akun berhasil! Silakan masuk.');
-header('Location: /login.php');
+header('Location: login.php');
 exit;

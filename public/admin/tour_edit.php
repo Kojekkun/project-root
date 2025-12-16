@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../app/db.php';
 
 require_login();
 
-// 1. Cek Admin
+// Cek Admin
 if (($_SESSION['user_role'] ?? '') !== 'admin') {
     header('Location: ../index.php');
     exit;
@@ -13,14 +13,14 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
 
 $id = $_GET['id'] ?? 0;
 
-// 2. Ambil Data Tour
+// Ambil Data Tour
 $stmt = $pdo->prepare("SELECT * FROM tours WHERE id = ?");
 $stmt->execute([$id]);
 $tour = $stmt->fetch();
 
 if (!$tour) { header('Location: ../tours.php'); exit; }
 
-// 3. Ambil Data Destinasi (Untuk Dropdown Relasi)
+// Ambil Data Destinasi
 $stmt_dest = $pdo->query("SELECT id, title FROM destinations");
 $destinations = $stmt_dest->fetchAll();
 ?>
@@ -36,7 +36,7 @@ $destinations = $stmt_dest->fetchAll();
     <nav class="nav">
         <a class="brand" href="../index.php">Admin Panel</a>
         <div class="nav-right">
-            <a href="../tour_detail.php?id=<?= $tour['id'] ?>" style="text-decoration:none; color:#555;">&larr; Batal</a>
+            <a href="../tour_detail.php?id=<?= $tour['id'] ?>" style="text-decoration:none; color:#555;">← Batal</a>
         </div>
     </nav>
 
@@ -68,14 +68,14 @@ $destinations = $stmt_dest->fetchAll();
                 <label>Harga (Rp)</label>
                 <input type="number" name="price" required value="<?= e($tour['price']) ?>">
                 
-                <label>Nomor WhatsApp Kontak (Format: 628...)</label>
+                <label>Nomor WhatsApp Kontak</label>
                 <input type="number" name="contact" required value="<?= e($tour['contact']) ?>">
 
                 <label>Deskripsi Singkat</label>
                 <textarea name="description" rows="3" required><?= e($tour['description']) ?></textarea>
 
                 <label>Jadwal Perjalanan (Itinerary)</label>
-                <textarea name="itinerary" rows="6" placeholder="Hari 1: ... &#10;Hari 2: ..."><?= e($tour['itinerary']) ?></textarea>
+                <textarea name="itinerary" rows="6" placeholder="Hari 1: ..."><?= e($tour['itinerary']) ?></textarea>
                 
                 <label>Foto Saat Ini</label>
                 <div style="margin-bottom: 10px;">

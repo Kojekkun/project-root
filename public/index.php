@@ -1,31 +1,79 @@
 <?php 
 // public/index.php
+// ... (Bagian atas PHP tetap sama) ...
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 require_once __DIR__.'/../app/db.php'; 
 require_once __DIR__.'/../app/helpers.php';
 
+// Logika Pencarian
+$keyword = trim($_GET['q'] ?? '');
+$category_filter = $_GET['cat'] ?? '';
+
 $dest = [];
-$tours = []; // Variabel untuk menampung data tour
+$tours = [];
+$categories = [];
+$hero_images = [];
 $error_db = "";
 
 try {
-    // 1. Ambil data DESTINASI
-    $sql_dest = 'SELECT d.*, c.name as category 
-            FROM destinations d 
-            LEFT JOIN categories c ON d.category_id = c.id 
-            ORDER BY d.id DESC';
-    $stm = $pdo->query($sql_dest);
-    if ($stm) {
-        $dest = $stm->fetchAll();
-    }
+    $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
 
-    // 2. Ambil data TOUR (Baru)
-    $sql_tour = "SELECT * FROM tours ORDER BY id DESC";
-    $stm_tour = $pdo->query($sql_tour);
-    if ($stm_tour) {
-        $tours = $stm_tour->fetchAll();
+    // 1. Ambil Destinasi
+    $sql_dest = "SELECT d.*, c.name as category FROM destinations d 
+                 LEFT JOIN categories c ON d.category_id = c.id WHERE 1=1";
+    $params_dest = [];
+
+    if (!empty($keyword)) {
+        $sql_dest .= " AND (d.title LIKE ? OR d.location LIKE ?)";
+        $params_dest[] = "%$keyword%";
+        $params_dest[] = "%$keyword%";
+    }
+    if (!empty($category_filter)) {
+        $sql_dest .= " AND d.category_id = ?";
+        $params_dest[] = $category_filter;
+    }
+    $sql_dest .= " ORDER BY d.id DESC LIMIT 6"; 
+    $stmt = $pdo->prepare($sql_dest);
+    $stmt->execute($params_dest);
+    $dest = $stmt->fetchAll();
+
+    // 2. Ambil Tour (DENGAN GAMBAR DESTINASI)
+    // PERBAIKAN: Kita ambil d.image agar tampilan konsisten
+    $sql_tour = "SELECT t.*, d.image as dest_image, d.title as dest_title 
+                 FROM tours t 
+                 LEFT JOIN destinations d ON t.destination_id = d.id 
+                 WHERE 1=1";
+    $params_tour = [];
+
+    if (!empty($keyword)) {
+        $sql_tour .= " AND (t.title LIKE ? OR t.description LIKE ?)";
+        $params_tour[] = "%$keyword%";
+        $params_tour[] = "%$keyword%";
+    }
+    $sql_tour .= " ORDER BY t.id DESC LIMIT 6"; 
+    $stmt_tour = $pdo->prepare($sql_tour);
+    $stmt_tour->execute($params_tour);
+    $tours = $stmt_tour->fetchAll();
+
+    // 3. Ambil Gambar Slideshow
+    $stmt_hero = $pdo->query("SELECT image FROM destinations WHERE image IS NOT NULL AND image != '' ORDER BY RAND() LIMIT 5");
+    $raw_images = $stmt_hero->fetchAll(PDO::FETCH_COLUMN);
+    
+    if (!empty($raw_images)) {
+        $hero_images = array_map('get_image_url', $raw_images);
+    }
+    
+    // Fallback HD
+    if (count($hero_images) < 3) {
+        $hd_stock = [
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=95',
+            'https://images.unsplash.com/photo-1511576661531-b34d7da5d0bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=95',
+            'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=95',
+            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=95'
+        ];
+        $hero_images = array_slice(array_merge($hero_images, $hd_stock), 0, 5);
     }
 
 } catch (Exception $e) {
@@ -37,145 +85,153 @@ try {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Pariwisata Lokal</title>
-    <link rel="stylesheet" href="assets/css/style.css?v=5"> 
+    <title>Travel Buddies</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=16"> 
 </head>
 <body>
-
     <nav class="nav">
-        <a class="brand" href="index.php">Pariwisata</a>
+        <a class="brand" href="index.php">Travel Buddies.</a>
         <div class="nav-right">
-            <a href="index.php" style="text-decoration:none; color:#2563eb; font-weight:bold;">Home</a>
-            
-            <?php if(is_logged()): ?>
-                <div class="nav-separator"></div>
-
-                <?php 
-                    $nav_foto = 'assets/images/placeholder.jpg'; 
-                    if (!empty($_SESSION['user_avatar']) && file_exists(__DIR__ . '/uploads/avatars/' . $_SESSION['user_avatar'])) {
-                        $nav_foto = 'uploads/avatars/' . $_SESSION['user_avatar'];
-                    }
-                ?>
-
-                <a href="profile.php" class="nav-profile">
-                    <img src="<?= $nav_foto ?>" class="nav-avatar" alt="Profil">
-                    <span class="nav-name"><?= e($_SESSION['user_name']) ?></span>
-                </a>
-                
-                <div class="nav-separator"></div>
-                <a href="logout.php" class="btn-logout">Logout</a>
-
-            <?php else: ?>
-                <span style="margin: 0 10px; color:#ccc;">|</span>
-                <a href="login.php" style="color:#333; margin-right:15px; text-decoration:none;">Login</a>
-                <a href="register.php" class="btn">Daftar</a>
+        <a href="index.php" class="nav-link">Beranda</a>
+        <a href="tours.php" class="nav-link">Paket Tour</a>
+        
+        <?php if(is_logged()): ?>
+            <div class="nav-separator"></div>
+            <?php if($_SESSION['user_role'] === 'admin'): ?>
+                <a href="admin/index.php" class="btn" style="padding: 8px 15px; font-size: 0.8rem;">Admin</a>
             <?php endif; ?>
-        </div>
+            
+            <a href="profile.php" class="nav-profile">
+                <?php 
+                    $avatar_url = !empty($_SESSION['user_avatar']) ? 'uploads/avatars/' . $_SESSION['user_avatar'] : 'assets/images/placeholder.jpg';
+                ?>
+                <img src="<?= $avatar_url ?>" class="nav-avatar" alt="Profil">
+            </a>
+        <?php else: ?>
+            <span style="margin: 0 10px; color:#ccc;">|</span>
+            <a href="login.php" class="nav-link">Masuk</a>
+            <a href="register.php" class="btn">Daftar</a>
+        <?php endif; ?>
+    </div>
     </nav>
 
-    <main class="container">
+    <div class="hero-section">
+        <div class="hero-slideshow" id="slideshowContainer">
+            <?php foreach($hero_images as $index => $img): ?>
+                <div class="hero-slide <?= $index === 0 ? 'active' : '' ?>" style="background-image: url('<?= $img ?>');"></div>
+            <?php endforeach; ?>
+        </div>
+        <div class="hero-overlay"></div>
         
+        <div class="hero-content">
+            <h1 class="hero-title">Explore Indonesia<br>Beyond Limits</h1>
+            <p class="hero-subtitle">Temukan pengalaman liburan tak terlupakan bersama kami.</p>
+            
+            <form action="index.php" method="get" class="hero-search">
+                <input type="text" name="q" class="search-input" placeholder="Cari destinasi impian..." value="<?= e($keyword) ?>">
+                <select name="cat" class="search-select">
+                    <option value="">Semua Kategori</option>
+                    <?php foreach($categories as $c): ?>
+                        <option value="<?= $c['id'] ?>" <?= $c['id'] == $category_filter ? 'selected' : '' ?>><?= e($c['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="search-btn">Jelajahi</button>
+            </form>
+        </div>
+    </div>
+
+    <main class="container">
         <?php if ($error_db): ?>
-            <div class="alert alert-danger">
-                <h3>⚠️ Terjadi Error Database:</h3>
-                <p><?= e($error_db) ?></p>
-            </div>
+            <div class="alert alert-danger"><h3>⚠️ Error:</h3><p><?= e($error_db) ?></p></div>
         <?php endif; ?>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1 style="margin: 0;">Destinasi Pilihan</h1>
-            
-            <?php if(!empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-                <a href="admin/destination_add.php" class="btn" style="box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-                    + Tambah Destinasi
-                </a>
-            <?php endif; ?>
+        <div class="section-header">
+            <div>
+                <h2 class="section-title">Destinasi Trending</h2>
+                <p class="section-desc">Spot liburan paling diminati bulan ini.</p>
+            </div>
         </div>
 
-        <?php if (count($dest) == 0): ?>
-            <p class="muted">Belum ada data destinasi.</p>
-        <?php endif; ?>
+        <?php if (count($dest) == 0): ?><div style="text-align:center; padding:60px;"><p class="muted">Belum ada data destinasi.</p></div><?php endif; ?>
 
         <div class="grid">
             <?php foreach($dest as $d): ?>
-                <article class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+                <article class="card">
                     <div style="position: relative;">
-                        <img src="uploads/<?= e($d['image'] ?? 'placeholder.jpg') ?>" 
-                             alt="<?= e($d['title']) ?>"
-                             style="width: 100%; height: 200px; object-fit: cover;">
-                        <span style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
-                            <?= e($d['category'] ?? 'Umum') ?>
-                        </span>
+                        <img src="<?= get_image_url($d['image']) ?>" alt="<?= e($d['title']) ?>" class="card-img" style="width: 100%; height: 240px; object-fit: cover;">
+                        <span style="position: absolute; top: 15px; left: 15px;" class="card-tag"><?= e($d['category'] ?? 'Umum') ?></span>
                     </div>
-                    
-                    <div style="padding: 20px; flex-grow: 1; display: flex; flex-direction: column;">
-                        <h3 style="margin-top: 0; margin-bottom: 10px;"><?= e($d['title']) ?></h3>
-                        <p class="muted" style="font-size: 0.9rem; margin-bottom: 15px;">
-                            📍 <?= e($d['location']) ?>
-                        </p>
-                        
-                        <div style="margin-top: auto;">
-                            <a class="btn" href="destination_detail.php?id=<?= $d['id'] ?>" style="display: block; text-align: center;">
-                                Lihat Detail
-                            </a>
-                        </div>
+                    <div class="card-body">
+                        <h3 style="margin: 0 0 5px; font-size: 1.25rem; font-weight:700;"><?= e($d['title']) ?></h3>
+                        <p style="color:#94a3b8; font-size: 0.9rem; margin-bottom: 20px;">📍 <?= e($d['location']) ?></p>
+                        <a href="destination_detail.php?id=<?= $d['id'] ?>" style="color:var(--accent); font-weight:700; text-decoration:none; font-size:0.95rem;">Lihat Detail &rarr;</a>
                     </div>
                 </article>
             <?php endforeach; ?>
         </div>
 
-
-        <br><br>
-        <hr style="border:0; border-top:1px solid #ddd;">
-        <br><br>
-
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1 style="margin: 0;">📦 Paket Tour & Open Trip</h1>
-
-            <?php if(!empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-                <a href="admin/tour_add.php" class="btn" style="box-shadow: 0 2px 5px rgba(0,0,0,0.2); background-color: #f59e0b;">
-                    + Tambah Tour Baru
-                </a>
-            <?php endif; ?>    
+        <div class="section-header">
+            <div>
+                <h2 class="section-title">Paket Terbaru</h2>
+                <p class="section-desc">Pilihan paket perjalanan lengkap untuk Anda.</p>
+            </div>
+            <a href="tours.php" style="color:var(--text-main); font-weight:600; text-decoration:none;">Lihat Semua &rarr;</a>
         </div>
 
-        <?php if (count($tours) == 0): ?>
-            <div class="alert" style="background: #f3f4f6; color: #555; text-align: center;">
-                Belum ada paket tour yang tersedia saat ini.
-            </div>
-        <?php endif; ?>
+        <?php if (count($tours) == 0): ?><div style="text-align:center; padding:60px;"><p class="muted">Belum ada paket tour.</p></div><?php endif; ?>
 
         <div class="grid">
             <?php foreach($tours as $t): ?>
-            <article class="card" style="padding:0; overflow:hidden; display:flex; flex-direction:column; border: 1px solid #e5e7eb;">
-                <div style="position:relative;">
-                    <img src="uploads/<?= e($t['image'] ?? 'placeholder.jpg') ?>" 
-                         style="width:100%; height:200px; object-fit:cover;">
-                    
-                    <span style="position:absolute; bottom:10px; right:10px; background:#2563eb; color:white; padding:5px 12px; border-radius:20px; font-weight:bold; font-size:0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                        Rp <?= number_format($t['price'], 0, ',', '.') ?>
-                    </span>
-                </div>
-                
-                <div style="padding:20px; flex-grow:1; display:flex; flex-direction:column;">
-                    <h3 style="margin-top:0; margin-bottom:10px; color:#1f2937;"><?= e($t['title']) ?></h3>
-                    
-                    <p class="muted" style="font-size:0.9rem; margin-bottom:20px; flex-grow:1; line-height:1.5;">
-                        <?= substr(e($t['description']), 0, 100) ?>...
-                    </p>
-                    
-                    <div style="display:flex; gap:10px; margin-top:auto;">
-                        <a href="tour_detail.php?id=<?= $t['id'] ?>" class="btn" style="flex:1; text-align:center;">
-                            Lihat Detail
+                <?php 
+                    // LOGIKA: Gunakan gambar destinasi jika ada, kalau tidak pakai gambar tour
+                    $final_image_tour = !empty($t['dest_image']) ? $t['dest_image'] : $t['image']; 
+                ?>
+                <article class="card">
+                    <div style="position:relative;">
+                        <img src="<?= get_image_url($final_image_tour) ?>" class="card-img" style="width:100%; height:220px; object-fit:cover;">
+                        <span style="position:absolute; bottom:15px; right:15px; background:rgba(255,255,255,0.95); color:var(--accent); padding:6px 14px; border-radius:50px; font-size:0.85rem; font-weight:800; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+                            IDR <?= number_format($t['price'] / 1000, 0) ?>K
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <small style="text-transform:uppercase; font-size:0.75rem; font-weight:700; color:var(--secondary); letter-spacing:0.5px;">
+                            <?= e($t['dest_title'] ?? 'OPEN TRIP') ?>
+                        </small>
+                        
+                        <h3 style="margin:5px 0 10px; font-size: 1.2rem; font-weight:700; line-height:1.4;">
+                            <?= e($t['title']) ?>
+                        </h3>
+                        
+                        <p style="color:#64748b; font-size:0.9rem; line-height:1.6; margin-bottom:20px;">
+                            <?= substr(e($t['description']), 0, 80) ?>...
+                        </p>
+                        
+                        <a href="tour_detail.php?id=<?= $t['id'] ?>" class="btn" style="width:100%; text-align:center; border-radius:10px;">
+                            Pesan Sekarang
                         </a>
                     </div>
-
-                </div>
-            </article>
+                </article>
             <?php endforeach; ?>
         </div>
+        <br><br>
+    </main>
+    
+    <footer>
+        <h3 class="brand" style="font-size:1.5rem; margin-bottom:10px;">Travel Buddies.</h3>
+        <p style="color:#94a3b8;">&copy; <?= date('Y') ?> Travel Buddies Inc. All rights reserved.</p>
+    </footer>
 
-        <br><br> </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.hero-slide');
+            if (slides.length === 0) return;
+            let currentIndex = 0;
+            setInterval(() => {
+                slides[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % slides.length;
+                slides[currentIndex].classList.add('active');
+            }, 5000);
+        });
+    </script>
 </body>
 </html>

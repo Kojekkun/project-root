@@ -43,9 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Update Database
-    $sql = "UPDATE tours SET title=?, price=?, contact=?, description=?, itinerary=?, destination_id=?, image=? WHERE id=?";
+    $map_embed = $_POST['map_embed'] ?? ''; // Ambil data map
+    $sql = "UPDATE tours SET title=?, price=?, contact=?, description=?, itinerary=?, destination_id=?, image=?, map_embed=? WHERE id=?";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$title, $price, $contact, $description, $itinerary, $dest_id, $image_filename, $id]);
+    $stmt->execute([$title, $price, $contact, $description, $itinerary, $dest_id, $image_filename, $map_embed, $id]);
 
     flash_set('success', 'Paket tour berhasil diupdate.');
     session_write_close();

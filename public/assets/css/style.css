@@ -1,162 +1,147 @@
-/* public/assets/css/style.css */
+/* =========================================
+   THEME: MODERN MINIMALIST (Final Polish)
+   ========================================= */
+
+/* 1. Import Font */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* 2. Variables */
 :root {
-    --primary: #2563eb;
-    --bg: #f3f4f6;
-    --card: #ffffff;
-    --text: #1f2937;
+    --primary: #0f172a;
+    --accent: #2563eb;
+    --secondary: #64748b;
+    --bg-body: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #334155;
+    --radius-xl: 24px;
+    --radius-md: 12px;
+    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
-body {
-    font-family: sans-serif;
-    background-color: var(--bg);
-    color: var(--text);
-    margin: 0;
+/* 3. Base */
+* { box-sizing: border-box; }
+body { 
+    margin: 0; padding: 0; padding-bottom: 80px; 
+    background-color: var(--bg-body); 
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-main); line-height: 1.6;
 }
+a { text-decoration: none; color: inherit; transition: all 0.2s; }
+img { max-width: 100%; display: block; }
+h1, h2, h3, h4 { color: var(--primary); margin-top: 0; }
 
-/* Navigasi */
+/* 4. Navbar */
 .nav {
-    background: var(--card);
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 5%; background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05);
+    position: sticky; top: 0; z-index: 1000;
 }
-.brand { font-weight: bold; font-size: 1.5rem; text-decoration: none; color: var(--primary); }
+.brand { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; color: var(--primary); }
+.nav-right { display: flex; align-items: center; gap: 25px; }
+.nav-link { font-weight: 600; color: var(--secondary); font-size: 0.95rem; }
+.nav-link:hover, .nav-link.active { color: var(--primary); }
+.nav-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; }
 
-.nav-right {
-    display: flex;              /* Wajib: Flexbox */
-    align-items: center;        /* Wajib: Rata tengah vertikal */
-    justify-content: flex-end;  /* Wajib: Rata kanan */
-    gap: 0;                     /* Kita atur jarak manual di anak elemen */
-    height: 100%;               /* Mengikuti tinggi navbar */
+/* 5. Hero & Page Header */
+.hero-section {
+    position: relative; width: 100%; height: 90vh; min-height: 600px;
+    background-color: #1e293b; display: flex; align-items: center; justify-content: center; 
+    overflow: hidden;
 }
-
-.nav-right a {
-    display: inline-flex;       /* Agar elemen di dalamnya bisa diatur */
-    align-items: center;
-    text-decoration: none;
-    margin: 0;                  /* Hapus margin lama yang bikin berantakan */
-    height: 40px;               /* Tinggi fix agar sejajar */
+.page-header {
+    text-align: center; padding: 80px 20px 60px;
+    background: white; border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 50px;
 }
+.page-title { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+.page-desc { color: var(--secondary); max-width: 600px; margin: 0 auto; font-size: 1.1rem; }
 
-.nav-separator {
-    width: 1px;
-    height: 20px;
-    background-color: #ddd;
-    margin: 0 15px;             /* Jarak kiri kanan garis */
+/* Slideshow */
+.hero-slideshow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+.hero-slide {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-position: center; background-size: cover; opacity: 0;
+    transition: opacity 1.5s ease-in-out, transform 8s linear; transform: scale(1.05);
 }
+.hero-slide.active { opacity: 1; transform: scale(1); }
+.hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); z-index: 1; }
+.hero-content { position: relative; z-index: 2; text-align: center; width: 100%; max-width: 800px; padding: 20px; }
+.hero-title { font-size: 4rem; margin-bottom: 20px; color: white !important; font-weight: 800; letter-spacing: -2px; line-height: 1.1; }
+.hero-subtitle { font-size: 1.25rem; margin-bottom: 40px; color: rgba(255,255,255,0.9); font-weight: 400; }
 
-/* Tombol Logout Spesifik */
-.btn-logout {
-    color: #ef4444;             /* Merah */
-    font-weight: 500;
-    font-size: 0.95rem;
-    padding: 5px 10px;
-    border-radius: 4px;
-    transition: background 0.2s;
+/* 6. Forms & Search */
+.hero-search, .search-container { 
+    background: white; padding: 8px; border-radius: 100px; 
+    display: inline-flex; gap: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
+    width: 100%; max-width: 700px; border: 1px solid rgba(0,0,0,0.05); align-items: center;
 }
-
-.btn-logout:hover {
-    background-color: #fee2e2;  /* Merah muda saat hover */
+.search-input { flex: 1; border: none; padding: 15px 25px; font-size: 1rem; border-radius: 50px; outline: none; }
+.search-select { border: none; border-left: 1px solid #f1f5f9; padding: 0 25px; font-weight: 600; color: var(--text-main); outline: none; background: transparent; cursor: pointer; }
+.search-btn {
+    background: var(--primary); color: white; border: none; padding: 15px 35px; 
+    border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
+.search-btn:hover { background: #334155; transform: translateY(-1px); }
 
-/* Container Utama */
-.container { max-width: 1000px; margin: 30px auto; padding: 20px; }
+/* Input Fields (General) */
+input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="number"], select, textarea {
+    width: 100%; padding: 14px 18px; border-radius: 12px;
+    border: 1px solid #e2e8f0; background: #f8fafc; font-family: inherit; font-size: 0.95rem;
+    margin-bottom: 20px; transition: all 0.2s; outline: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); background: white; box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
+label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary); font-size: 0.9rem; }
 
-/* Card / Kotak Putih */
+/* 7. Cards */
+.container { max-width: 1150px; margin: 0 auto; padding: 0 20px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
 .card {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
+    background: var(--bg-card); border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft); transition: all 0.3s ease;
+    overflow: hidden; border: 1px solid rgba(0,0,0,0.02);
 }
+.card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+.card-img { width: 100%; object-fit: cover; }
+.card-body { padding: 25px; }
+.card-tag { background: white; color: var(--primary); font-weight: 700; font-size: 0.75rem; padding: 6px 14px; border-radius: 50px; }
 
-/* Form Input */
-input, select, textarea {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0 20px 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-/* Tombol */
+/* 8. Buttons */
 .btn {
-    background-color: var(--primary);
-    color: white;
-    padding: 10px 20px;
-    text-decoration: none;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
+    display: inline-block; background: var(--primary); color: white;
+    padding: 12px 24px; border-radius: 10px; font-weight: 600; text-align: center;
+    border: none; cursor: pointer; transition: all 0.2s;
 }
-.btn:hover { opacity: 0.9; }
+.btn:hover { background: #334155; transform: translateY(-1px); }
 
-/* Grid Destinasi */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+/* 9. Auth Pages (Login/Register) */
+.auth-body {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 80vh; padding: 40px 20px;
 }
-.grid img { width: 100%; height: 150px; object-fit: cover; border-radius: 5px; }
+.auth-card {
+    width: 100%; max-width: 420px; background: white; padding: 40px;
+    border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    border: 1px solid #f1f5f9; text-align: center;
+}
+.auth-title { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+.auth-subtitle { color: var(--secondary); margin-bottom: 30px; font-size: 0.95rem; }
 
-/* --- Tambahan untuk Notifikasi (Alert) --- */
-.alert {
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    font-weight: bold;
-}
+/* 10. Utilities */
+.alert { padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: 500; text-align: left; }
+.alert-danger { background: #fee2e2; color: #991b1b; }
+.alert-success { background: #dcfce7; color: #166534; }
+.muted { color: var(--secondary); }
+.text-center { text-align: center; }
 
-/* Warna Merah untuk Error */
-.alert-danger {
-    color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-}
+/* 11. Footer */
+footer { background: white; padding: 60px 20px; text-align: center; border-top: 1px solid #f1f5f9; margin-top: 80px; }
 
-/* Warna Hijau untuk Sukses */
-.alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-}
-
-/* Avatar di Navbar */
-.nav-avatar {
-    width: 35px;              
-    height: 35px;
-    border-radius: 50%;        
-    object-fit: cover;         
-    border: 2px solid #fff;     
-    box-shadow: 0 0 3px rgba(0,0,0,0.2); 
-    margin-right: 10px;         
-}
-.nav-user-link {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: #333;
-}
-.nav-profile {
-    display: inline-flex;       /* Agar berjejer ke samping */
-    align-items: center;        /* KUNCI: Membuat teks & gambar sejajar tengah vertikal */
-    text-decoration: none;      /* Hilangkan garis bawah link */
-    color: #333;                /* Warna teks standar */
-    padding: 5px 10px;          /* Beri sedikit ruang napas */
-    border-radius: 50px;        /* Sisi membulat (opsional, gaya modern) */
-    transition: background 0.2s;
-}
-.nav-profile:hover {
-    background-color: #f3f4f6;  /* Efek abu-abu tipis saat mouse lewat */
-}
-
-.nav-name {
-    font-weight: 600;           /* Teks agak tebal */
-    font-size: 0.95rem;
+/* Mobile */
+@media (max-width: 768px) {
+    .hero-title { font-size: 2.5rem; }
+    .hero-search, .search-container { flex-direction: column; padding: 15px; border-radius: 20px; }
+    .search-input, .search-select { border-left: none; border-bottom: 1px solid #f1f5f9; text-align: center; }
+    .nav { flex-direction: column; gap: 15px; }
 }
