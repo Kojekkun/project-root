@@ -66,7 +66,7 @@ try {
 
     // 7. Sukses & Redirect
     flash_set('success', '✅ Pembayaran Berhasil! Paket tour telah dibooking.');
-    header('Location: history.php'); // Langsung arahkan ke History
+    header('Location: profile.php'); // Langsung arahkan ke History
     exit;
 
 } catch (Exception $e) {

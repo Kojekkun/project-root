@@ -13,7 +13,7 @@ $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch();
 
-// 2. Ambil Riwayat (PERBAIKAN: Ganti total_price jadi amount)
+// 2. Ambil Riwayat
 $sql_history = "
     SELECT 'booking' as type, b.id, t.title as item_name, b.amount as amount, b.status, b.created_at 
     FROM bookings b 
@@ -34,7 +34,6 @@ try {
     $stmt_hist->execute([$user_id, $user_id]);
     $history = $stmt_hist->fetchAll();
 } catch (Exception $e) {
-    // Jika masih error, kosongkan history agar profil tetap bisa dibuka
     $history = [];
 }
 ?>
@@ -43,12 +42,18 @@ try {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Profil Saya - Travel Buddies</title>
-    <link rel="stylesheet" href="assets/css/style.css?v=21">
+    <title>Profil Saya - Pariwisata</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=22">
     <style>
         .profile-grid { display: grid; grid-template-columns: 350px 1fr; gap: 30px; align-items: start; }
         @media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } }
-        .avatar-lg { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        /* PERBAIKAN CSS DISINI: Menambahkan margin auto agar gambar ke tengah */
+        .avatar-lg { 
+            width: 120px; height: 120px; border-radius: 50%; object-fit: cover; 
+            border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            margin: 0 auto 20px auto; /* KUNCI PERBAIKAN: margin auto */
+            display: block;
+        }
         .balance-card { background: linear-gradient(135deg, var(--primary), #1e293b); color: white; padding: 25px; border-radius: 20px; margin-top: 20px; position: relative; overflow: hidden; }
         .balance-card::after { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; }
         .table-container { overflow-x: auto; }
@@ -67,7 +72,7 @@ try {
 <body>
     
     <nav class="nav">
-        <a class="brand" href="index.php">Travel Buddies.</a>
+        <a class="brand" href="index.php">Pariwisata.</a>
         <div class="nav-right">
             <a href="index.php" class="nav-link">Beranda</a>
             <a href="tours.php" class="nav-link">Paket Tour</a>
@@ -91,6 +96,8 @@ try {
                 <div class="card" style="text-align:center; padding: 40px 30px;">
                     <?php 
                         $avatar_url = !empty($user['avatar']) ? get_image_url('avatars/' . $user['avatar']) : 'assets/images/placeholder.jpg';
+                        // Fallback jika file tidak ada
+                        if (strpos($avatar_url, 'http') === false && !file_exists($avatar_url)) $avatar_url = 'assets/images/placeholder.jpg';
                     ?>
                     <img src="<?= $avatar_url ?>" class="avatar-lg" alt="Avatar">
                     
@@ -148,7 +155,7 @@ try {
                                         </td>
                                         <td style="color:var(--secondary); font-size:0.9rem;"><?= date('d M Y', strtotime($h['created_at'])) ?><br><small><?= date('H:i', strtotime($h['created_at'])) ?></small></td>
                                         <td style="font-weight:600;">Rp <?= number_format($h['amount'], 0, ',', '.') ?></td>
-                                        <td><span class="status-badge status-<?= ($h['status'] == 'success' || $h['status'] == 'confirmed') ? 'success' : (($h['status'] == 'failed') ? 'failed' : 'pending') ?>"><?= e($h['status']) ?></span></td>
+                                        <td><span class="status-badge status-<?= ($h['status'] == 'success' || $h['status'] == 'paid' || $h['status'] == 'confirmed') ? 'success' : (($h['status'] == 'failed') ? 'failed' : 'pending') ?>"><?= e($h['status']) ?></span></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -159,6 +166,6 @@ try {
             </div>
         </div>
     </main>
-    <footer><h3 class="brand">Travel Buddies.</h3><p class="muted">&copy; <?= date('Y') ?> Travel Buddies Inc.</p></footer>
+    <footer><h3 class="brand">Pariwisata.</h3><p class="muted">&copy; <?= date('Y') ?> Pariwisata Inc.</p></footer>
 </body>
 </html>

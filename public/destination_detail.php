@@ -28,7 +28,7 @@ $related_tours = $stmt_tours->fetchAll();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title><?= e($dest['title']) ?> - Travel Buddies</title>
+    <title><?= e($dest['title']) ?> - Pariwisata</title>
     <link rel="stylesheet" href="assets/css/style.css?v=11">
     <style>
         .map-container iframe { width: 100%; height: 400px; border: 0; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -36,7 +36,7 @@ $related_tours = $stmt_tours->fetchAll();
 </head>
 <body>
     <nav class="nav">
-        <a class="brand" href="index.php">Travel Buddies</a>
+        <a class="brand" href="index.php">Pariwisata.</a>
         <div class="nav-right">
             <a href="index.php" style="text-decoration:none; color:var(--text-main);">Beranda</a>
             <a href="tours.php" style="text-decoration:none; color:var(--text-main);">Paket Tour</a>
@@ -120,8 +120,8 @@ $related_tours = $stmt_tours->fetchAll();
     </main>
 
     <footer style="background:var(--bg-card); padding:40px 20px; text-align:center; border-top:1px solid #eee; margin-top:80px;">
-        <h3 class="brand" style="font-size:1.5rem; margin-bottom:10px;">Travel Buddies</h3>
-        <p class="muted">&copy; <?= date('Y') ?> Travel Buddies.</p>
+        <h3 class="brand" style="font-size:1.5rem; margin-bottom:10px;">Pariwisata</h3>
+        <p class="muted">&copy; <?= date('Y') ?> Pariwisata.</p>
     </footer>
 </body>
 </html>
