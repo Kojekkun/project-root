@@ -1,6 +1,5 @@
 <?php 
 // public/index.php
-// ... (Bagian atas PHP tetap sama) ...
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -39,8 +38,7 @@ try {
     $stmt->execute($params_dest);
     $dest = $stmt->fetchAll();
 
-    // 2. Ambil Tour (DENGAN GAMBAR DESTINASI)
-    // PERBAIKAN: Kita ambil d.image agar tampilan konsisten
+    // 2. Ambil Tour
     $sql_tour = "SELECT t.*, d.image as dest_image, d.title as dest_title 
                  FROM tours t 
                  LEFT JOIN destinations d ON t.destination_id = d.id 
@@ -85,12 +83,12 @@ try {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Travel Buddies</title>
+    <title>Pariwisata</title>
     <link rel="stylesheet" href="assets/css/style.css?v=16"> 
 </head>
 <body>
     <nav class="nav">
-        <a class="brand" href="index.php">Travel Buddies.</a>
+        <a class="brand" href="index.php">Pariwisata.</a>
         <div class="nav-right">
         <a href="index.php" class="nav-link">Beranda</a>
         <a href="tours.php" class="nav-link">Paket Tour</a>
@@ -183,7 +181,6 @@ try {
         <div class="grid">
             <?php foreach($tours as $t): ?>
                 <?php 
-                    // LOGIKA: Gunakan gambar destinasi jika ada, kalau tidak pakai gambar tour
                     $final_image_tour = !empty($t['dest_image']) ? $t['dest_image'] : $t['image']; 
                 ?>
                 <article class="card">
@@ -217,8 +214,8 @@ try {
     </main>
     
     <footer>
-        <h3 class="brand" style="font-size:1.5rem; margin-bottom:10px;">Travel Buddies.</h3>
-        <p style="color:#94a3b8;">&copy; <?= date('Y') ?> Travel Buddies Inc. All rights reserved.</p>
+        <h3 class="brand" style="font-size:1.5rem; margin-bottom:10px;">Pariwisata.</h3>
+        <p style="color:#94a3b8;">&copy; <?= date('Y') ?> Pariwisata Inc. All rights reserved.</p>
     </footer>
 
     <script>

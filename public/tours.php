@@ -5,16 +5,9 @@ require_once __DIR__ . '/../app/helpers.php';
 
 // Logika Pencarian & Filter
 $keyword = trim($_GET['q'] ?? '');
-$category_filter = $_GET['cat'] ?? ''; // Tangkap filter kategori
+$category_filter = $_GET['cat'] ?? '';
 
-// Ambil data kategori untuk dropdown
 $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
-
-// QUERY TOUR (LENGKAP)
-// 1. Join ke destinations untuk ambil gambar & judul destinasi
-// 2. Join ke categories (opsional, jika ingin filter by category di tabel tours)
-//    Asumsi: Tabel tours punya kolom category_id, ATAU kita filter berdasarkan kategori destinasi.
-//    Biasanya tour mengikuti kategori destinasi. Mari kita filter berdasarkan kategori destinasi (d.category_id).
 
 $sql = "SELECT t.*, d.image as dest_image, d.title as dest_title, d.category_id 
         FROM tours t 
@@ -23,16 +16,13 @@ $sql = "SELECT t.*, d.image as dest_image, d.title as dest_title, d.category_id
 
 $params = [];
 
-// Filter Kata Kunci
 if (!empty($keyword)) {
     $sql .= " AND (t.title LIKE ? OR t.description LIKE ?)";
     $params[] = "%$keyword%";
     $params[] = "%$keyword%";
 }
 
-// Filter Kategori (Baru Ditambahkan)
 if (!empty($category_filter)) {
-    // Kita filter berdasarkan kategori destinasi yang terkait
     $sql .= " AND d.category_id = ?";
     $params[] = $category_filter;
 }
@@ -48,13 +38,13 @@ $tours = $stmt->fetchAll();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Semua Paket Tour - Travel Buddies</title>
+    <title>Semua Paket Tour - Pariwisata</title>
     <link rel="stylesheet" href="assets/css/style.css?v=17">
 </head>
 <body>
     
     <nav class="nav">
-        <a class="brand" href="index.php">Travel Buddies.</a>
+        <a class="brand" href="index.php">Pariwisata.</a>
         <div class="nav-right">
             <a href="index.php" class="nav-link">Beranda</a>
             <a href="tours.php" class="nav-link active">Paket Tour</a>
@@ -114,7 +104,6 @@ $tours = $stmt->fetchAll();
             <div class="grid">
                 <?php foreach($tours as $t): ?>
                     <?php 
-                        // Prioritas gambar: Gambar Destinasi > Gambar Tour
                         $img = !empty($t['dest_image']) ? $t['dest_image'] : $t['image']; 
                     ?>
                     <article class="card">
@@ -148,8 +137,8 @@ $tours = $stmt->fetchAll();
     </main>
 
     <footer>
-        <h3 class="brand" style="font-size:1.5rem; margin-bottom:10px;">Travel Buddies.</h3>
-        <p class="muted">&copy; <?= date('Y') ?> Travel Buddies Inc. All rights reserved.</p>
+        <h3 class="brand" style="font-size:1.5rem; margin-bottom:10px;">Pariwisata.</h3>
+        <p class="muted">&copy; <?= date('Y') ?> Pariwisata Inc. All rights reserved.</p>
     </footer>
 </body>
 </html>

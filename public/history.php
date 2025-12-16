@@ -1,39 +1,22 @@
 <?php
 // public/history.php
-
-// 1. AKTIFKAN PENDETEKSI ERROR
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// 2. Load File
 $db_file = __DIR__ . '/../app/db.php';
 $helper_file = __DIR__ . '/../app/helpers.php';
-
-if (!file_exists($db_file)) die("❌ Error Fatal: File app/db.php tidak ditemukan.");
-if (!file_exists($helper_file)) die("❌ Error Fatal: File app/helpers.php tidak ditemukan.");
-
 require_once $db_file;
 require_once $helper_file;
 
-// 3. Cek Login
 require_login();
 $user_id = $_SESSION['user_id'];
 
-// 4. Query Data
 $history = [];
 
 try {
-    // Query A: Ambil Data Booking Tour
-    // PERBAIKAN: Menggunakan 'b.amount' bukan 'b.total_price'
     $sql_booking = "
-        SELECT 
-            'booking' as type, 
-            b.id, 
-            t.title as description, 
-            b.amount as amount,  -- SUDAH DIPERBAIKI (Sebelumnya total_price)
-            b.status, 
-            b.created_at 
+        SELECT 'booking' as type, b.id, t.title as description, b.amount as amount, b.status, b.created_at 
         FROM bookings b 
         JOIN tours t ON b.tour_id = t.id 
         WHERE b.user_id = ?
@@ -42,15 +25,8 @@ try {
     $stmt->execute([$user_id]);
     $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Query B: Ambil Data Transaksi (Topup/Pembayaran)
     $sql_trans = "
-        SELECT 
-            'transaction' as type, 
-            id, 
-            description, 
-            amount, 
-            'success' as status, 
-            created_at 
+        SELECT 'transaction' as type, id, description, amount, 'success' as status, created_at 
         FROM transactions 
         WHERE user_id = ?
     ";
@@ -58,7 +34,6 @@ try {
     $stmt->execute([$user_id]);
     $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Gabungkan & Urutkan
     $history = array_merge($bookings, $transactions);
     usort($history, function($a, $b) {
         return strtotime($b['created_at']) - strtotime($a['created_at']);
@@ -73,7 +48,7 @@ try {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Riwayat Aktivitas - Travel Buddies</title>
+    <title>Riwayat Aktivitas - Pariwisata</title>
     <link rel="stylesheet" href="assets/css/style.css?v=21">
     <style>
         .badge { padding: 4px 10px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; }
@@ -88,7 +63,7 @@ try {
 <body>
     
     <nav class="nav">
-        <a class="brand" href="index.php">Travel Buddies.</a>
+        <a class="brand" href="index.php">Pariwisata.</a>
         <div class="nav-right">
             <a href="index.php" class="nav-link">Beranda</a>
             <a href="tours.php" class="nav-link">Paket Tour</a>
@@ -128,17 +103,14 @@ try {
                                 <?= date('d M Y', strtotime($h['created_at'])) ?><br>
                                 <small><?= date('H:i', strtotime($h['created_at'])) ?></small>
                             </td>
-                            
                             <td>
                                 <strong><?= htmlspecialchars($h['description'] ?? '-') ?></strong><br>
                                 <small style="color:#888; text-transform: uppercase;">
                                     <?= $h['type'] === 'booking' ? '🎫 Booking' : '💳 Transaksi' ?>
                                 </small>
                             </td>
-
                             <td style="text-align:right; font-weight:bold;">
                                 <?php 
-                                    // Logika Warna
                                     $is_topup = ($h['type'] === 'transaction' && stripos($h['description'] ?? '', 'top up') !== false);
                                     $color = $is_topup ? '#16a34a' : '#333';
                                     $sign = $is_topup ? '+ ' : '';
@@ -147,7 +119,6 @@ try {
                                     <?= $sign ?>Rp <?= number_format($h['amount'], 0, ',', '.') ?>
                                 </span>
                             </td>
-
                             <td style="text-align:center;">
                                 <?php
                                     $status = strtolower($h['status']);

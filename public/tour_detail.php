@@ -5,7 +5,6 @@ require_once __DIR__ . '/../app/helpers.php';
 
 $id = $_GET['id'] ?? 0;
 
-// QUERY UPDATE: Ambil data Tour + Gambar Destinasi
 $sql = "SELECT t.*, d.image as dest_image, d.title as dest_title 
         FROM tours t 
         LEFT JOIN destinations d ON t.destination_id = d.id 
@@ -20,7 +19,6 @@ if (!$tour) {
     exit;
 }
 
-// LOGIKA GAMBAR: Prioritaskan gambar destinasi
 $final_image = !empty($tour['dest_image']) ? $tour['dest_image'] : $tour['image'];
 ?>
 <!doctype html>
@@ -33,7 +31,7 @@ $final_image = !empty($tour['dest_image']) ? $tour['dest_image'] : $tour['image'
 </head>
 <body>
     <nav class="nav">
-        <a class="brand" href="index.php">Travel Buddies</a>
+        <a class="brand" href="index.php">Pariwisata</a>
         <div class="nav-right">
             <a href="index.php" style="text-decoration:none; color:var(--text-main);">Beranda</a>
             <a href="tours.php" style="text-decoration:none; color:var(--text-main); font-weight:bold;">Paket Tour</a>
@@ -173,8 +171,8 @@ $final_image = !empty($tour['dest_image']) ? $tour['dest_image'] : $tour['image'
     </main>
     
     <footer style="background:var(--bg-card); padding:40px 20px; text-align:center; border-top:1px solid #eee; margin-top:80px;">
-        <h3 class="brand" style="font-size:1.5rem; margin-bottom:10px;">Travel Buddies</h3>
-        <p class="muted">&copy; <?= date('Y') ?> Travel Buddies.</p>
+        <h3 class="brand" style="font-size:1.5rem; margin-bottom:10px;">Pariwisata.</h3>
+        <p class="muted">&copy; <?= date('Y') ?> Pariwisata.</p>
     </footer>
 </body>
 </html>

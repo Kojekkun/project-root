@@ -7,11 +7,10 @@ if(is_logged()) { header('Location: index.php'); exit; }
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Masuk - Travel Buddies</title>
+    <title>Masuk - Pariwisata</title>
     <link rel="stylesheet" href="assets/css/style.css?v=15">
 </head>
 <body class="auth-body">
-    
     <div class="auth-card">
         <h2 class="auth-title">Welcome Back!</h2>
         <p class="auth-subtitle">Masuk untuk melanjutkan petualanganmu.</p>
@@ -25,13 +24,10 @@ if(is_logged()) { header('Location: index.php'); exit; }
 
         <form method="post" action="login_handler.php" style="text-align:left;">
             <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-            
             <label>Email Address</label>
             <input name="email" type="email" required placeholder="nama@email.com">
-            
             <label>Password</label>
             <input name="password" type="password" required placeholder="••••••••">
-            
             <button class="btn" style="width:100%; margin-top:10px; border-radius:50px; padding:14px;">Masuk Sekarang</button>
         </form>
         
@@ -41,6 +37,5 @@ if(is_logged()) { header('Location: index.php'); exit; }
             <a href="index.php" style="color: var(--text-main); text-decoration: none; font-weight:500;">&larr; Kembali ke Beranda</a>
         </div>
     </div>
-
 </body>
 </html>

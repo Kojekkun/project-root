@@ -53,7 +53,7 @@ try {
     $stmt->execute([$price, $user_id]);
 
     // 5. Simpan Data Booking
-    $stmt = $pdo->prepare("INSERT INTO bookings (user_id, tour_id, tour_date, total_price, status, created_at) VALUES (?, ?, ?, ?, 'confirmed', NOW())");
+    $stmt = $pdo->prepare("INSERT INTO bookings (user_id, tour_id, tour_date, amount, status, created_at) VALUES (?, ?, ?, ?, 'paid', NOW())");
     $stmt->execute([$user_id, $tour_id, $tour_date, $price]);
 
     // 6. [PENTING] Catat di Tabel Transactions (Agar muncul di Riwayat Keuangan)
